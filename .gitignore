@@ -9,6 +9,9 @@
 *.qdf
 *.qpf
 *.done
+*.cdf
+*.bak
+output_files/
 c5_pin_model_dump.txt
 incremental_db
 db

@@ -950,20 +950,7 @@ set_instance_assignment -name PACKAGE_SKEW_COMPENSATION OFF -to HPS_DDR3_WE_N
 set_instance_assignment -name PACKAGE_SKEW_COMPENSATION OFF -to HPS_DDR3_RESET_N
 set_instance_assignment -name PACKAGE_SKEW_COMPENSATION OFF -to HPS_DDR3_CK_P
 set_instance_assignment -name PACKAGE_SKEW_COMPENSATION OFF -to HPS_DDR3_CK_N
-set_global_assignment -name SIGNALTAP_FILE lcd_scope.stp
-set_global_assignment -name QXP_FILE scope_capture.qxp
-set_global_assignment -name QXP_FILE flash.qxp
-set_global_assignment -name QXP_FILE SevenSegmentDisplayDecoder.qxp
-set_global_assignment -name QXP_FILE var_clk_div32.qxp
-set_global_assignment -name QXP_FILE to_slow_clk_interface.qxp
-set_global_assignment -name QXP_FILE speed_reg_control.qxp
-set_global_assignment -name QXP_FILE LCD_Scope_Encapsulated_pacoblaze.qxp
-set_global_assignment -name QXP_FILE audio_controller.qxp
-set_global_assignment -name QXP_FILE async_trap_and_reset_gen_1_pulse.qxp
-set_global_assignment -name QXP_FILE async_trap_and_reset.qxp
 
-set_global_assignment -name SDC_FILE timing_constraints.sdc
-set_global_assignment -name VERILOG_FILE simple_ipod_solution.v
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE lcd_scope.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
@@ -1609,5 +1596,28 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_PIPELINE=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_PIPELINE=0" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_COUNTER_PIPELINE=0" -section_id auto_signaltap_0
+set_global_assignment -name SYSTEMVERILOG_FILE src/Write_Kbd_To_Scope_LCD.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/Write_Kbd_To_LCD.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/widereg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/simple_ipod_solution.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/LCD_Scope_Encapsulated_pacoblaze_wrapper.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/key2ascii.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/Kbd_ctrl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/Generate_Arbitrary_Divided_Clk32.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/doublesync.sv
+set_global_assignment -name SYSTEMVERILOG_FILE src/clock_divider.sv
+set_global_assignment -name SIGNALTAP_FILE lcd_scope.stp
+set_global_assignment -name QXP_FILE scope_capture.qxp
+set_global_assignment -name QXP_FILE flash.qxp
+set_global_assignment -name QXP_FILE SevenSegmentDisplayDecoder.qxp
+set_global_assignment -name QXP_FILE var_clk_div32.qxp
+set_global_assignment -name QXP_FILE to_slow_clk_interface.qxp
+set_global_assignment -name QXP_FILE speed_reg_control.qxp
+set_global_assignment -name QXP_FILE LCD_Scope_Encapsulated_pacoblaze.qxp
+set_global_assignment -name QXP_FILE audio_controller.qxp
+set_global_assignment -name QXP_FILE async_trap_and_reset_gen_1_pulse.qxp
+set_global_assignment -name QXP_FILE async_trap_and_reset.qxp
+set_global_assignment -name SDC_FILE timing_constraints.sdc
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name SLD_FILE db/lcd_scope_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
