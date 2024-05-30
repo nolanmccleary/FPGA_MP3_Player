@@ -8,7 +8,7 @@
 *.sof
 *.qdf
 *.qpf
-Basic_Organ_Solution.done
+*.done
 c5_pin_model_dump.txt
 incremental_db
 db
