@@ -262,6 +262,13 @@ wire            flash_mem_readdatavalid;
 wire    [3:0]   flash_mem_byteenable;
 
 
+assign flash_mem_write = 1'b0;
+assign flash_mem_writedata = 32'b0;
+assign flash_mem_burstcount = 6'b000001;
+assign flash_mem_read = 1'b1;
+
+
+
 flash flash_inst (
     .clk_clk                 (CLK_50M),
     .reset_reset_n           (1'b1),
@@ -276,6 +283,13 @@ flash flash_inst (
     .flash_mem_byteenable    (flash_mem_byteenable)
 );
             
+
+
+
+
+
+
+
 
 assign Sample_Clk_Signal = Clock_1KHz;
 
@@ -588,8 +602,7 @@ speed_reg_control_inst
 .speed_control_val(speed_control_val)
 );
 
-parameter [15:0] default_scope_sampling_clock_count = 44_000; //22KHz
-
+parameter [15:0] default_scope_sampling_clock_count = 44_000; //44KHz, being passed not as count but as freq reading to my clk divider
 
 always @ (posedge CLK_50M) 
 begin

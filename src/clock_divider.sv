@@ -7,7 +7,7 @@ module clock_divider
         input logic clk,
         input logic enable, 
         input logic [WIDTH-1:0] freq_hertz, 
-        output logic out
+        output logic clk_out
     );
 
     integer pulseCount;

@@ -1,15 +1,12 @@
 module address_select
     #(
-        parameter BASE = 69,
-        parameter MAX_OFFSET = 420
         parameter WORD_DELTA = 1
     )
     (
-        input logic reset,
         input logic reverse,
-        input logic [31:0] curr_word,
+        input logic [22:0] curr_word,
         input logic [1:0] curr_byte,
-        output logic [31:0] next_word,
+        output logic [22:0] next_word,
         output logic [1:0] next_byte
     );
 
@@ -21,51 +18,44 @@ module address_select
 
 
     always_comb begin
-        if((curr_word >= BASE + MAX_OFFSET) || (curr_word < BASE) || rst)begin   //TODO: implement circular looping if required
-            next_word = BASE;
-            next_byte = FIRST;
-        end 
-
-        else begin
-            case(curr_byte)
-                FIRST: begin
-                    if(rev) begin
-                        next_word = curr_word - WORD_DELTA;
-                        next_byte = FOURTH;
-                    end else begin
-                        next_word = curr_word;
-                        next_byte = SECOND;
-                    end
-                end
-
-                SECOND: begin
+        case(curr_byte)
+            FIRST: begin
+                if(rev) begin
+                    next_word = curr_word - WORD_DELTA;
+                    next_byte = FOURTH;
+                end else begin
                     next_word = curr_word;
-                    if(rev) begin
-                        next_byte = FIRST;
-                    end else begin
-                        next_byte = THIRD;
-                    end
+                    next_byte = SECOND;
                 end
+            end
 
-                THIRD: begin
+            SECOND: begin
+                next_word = curr_word;
+                if(rev) begin
+                    next_byte = FIRST;
+                end else begin
+                    next_byte = THIRD;
+                end
+            end
+
+            THIRD: begin
+                next_word = curr_word;
+                if(rev) begin
+                    next_byte = SECOND;
+                end else begin
+                    next_byte = FOURTH;
+                end
+            end
+
+            FOURTH: begin
+                if(rev) begin
                     next_word = curr_word;
-                    if(rev) begin
-                        next_byte = SECOND;
-                    end else begin
-                        next_byte = FOURTH;
-                    end
+                    next_byte = THIRD;
+                end else begin
+                    next_word = curr_word + WORD_DELTA;
+                    next_byte = FIRST;
                 end
-
-                FOURTH: begin
-                    if(rev) begin
-                        next_word = curr_word;
-                        next_byte = THIRD;
-                    end else begin
-                        next_word = curr_word + WORD_DELTA;
-                        next_byte = FIRST;
-                    end
-                end
-            endcase
-        end
+            end
+        endcase
     end
 endmodule
