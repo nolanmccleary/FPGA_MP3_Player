@@ -4,19 +4,20 @@ module flashcontroller
         parameter DRIVER_FREQ = 27_000
     )
     (
-        input logic rst,
+        input logic reset,
         input logic clk,
         input logic enable,
         input logic reverse,
-        input logic [WIDTH-1:0] speed
+        input logic [WIDTH-1:0] speed,
 
-        logic fetch_pulse;
+        output logic [7:0] audio_out
     );
 
+    logic fetchClk;
+    clock_divider #(.WIDTH(WIDTH), .CLOCK_FREQ(DRIVER_FREQ)) divider(.clk(clk), .enable(enable), .freq_hertz(speed), .out(fetchClk));
 
-    clock_divider #(.WIDTH(WIDTH), .CLOCK_FREQ(DRIVER_FREQ)) divider(.clk(clk), .enable(enable), .freq_hertz(speed));
-
-
+    //FSM goes here;
+    flash_fetcher(.fetchClk(fetchClk), .reverse(reverse), .reset(reset), .out(audio_out));    
 
 
 endmodule

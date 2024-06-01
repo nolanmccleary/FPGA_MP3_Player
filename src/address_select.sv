@@ -5,7 +5,8 @@ module address_select
         parameter WORD_DELTA = 1
     )
     (
-        input logic rst,
+        input logic reset,
+        input logic reverse,
         input logic [31:0] curr_word,
         input logic [1:0] curr_byte,
         output logic [31:0] next_word,
@@ -20,11 +21,11 @@ module address_select
 
 
     always_comb begin
-        if((curr_word >= BASE + MAX_OFFSET) || (curr_word < BASE))begin
+        if((curr_word >= BASE + MAX_OFFSET) || (curr_word < BASE) || rst)begin   //TODO: implement circular looping if required
             next_word = BASE;
             next_byte = FIRST;
         end 
-        
+
         else begin
             case(curr_byte)
                 FIRST: begin
