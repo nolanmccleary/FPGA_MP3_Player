@@ -226,6 +226,31 @@ wire Sample_Clk_Signal;
 //
 //
 
+logic [15:0] scope_sampling_clock_count;
+
+logic control_bus = SW[4:2];
+logic rst = control_bus[0];
+logic enable = control_bus[1];
+logic reverse = control_bus[2];
+
+
+logic [15:0] speed;
+assign speed = scope_sampling_clock_count;
+
+logic sample_clk;
+assign sample_clk = TD_CLK27;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -383,6 +408,7 @@ scope_capture LCD_scope_channelA(
 .captured_data(scope_channelA), //Insert your channel B signal here
 .reset(1'b1));
 
+/*
 scope_capture LCD_scope_channelB
 (
 .clk(scope_clk),
@@ -390,6 +416,20 @@ scope_capture LCD_scope_channelB
 .capture_enable(allow_run_LCD_scope & user_scope_enable), 
 .captured_data(scope_channelB), //Insert your channel A signal here
 .reset(1'b1));
+*/
+
+assign scope_channelB = control_bus;
+
+
+
+
+
+
+
+
+
+
+
 
 //The LCD scope and display
 LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
@@ -548,8 +588,7 @@ speed_reg_control_inst
 .speed_control_val(speed_control_val)
 );
 
-logic [15:0] scope_sampling_clock_count;
-parameter [15:0] default_scope_sampling_clock_count = 12499; //2KHz
+parameter [15:0] default_scope_sampling_clock_count = 44_000; //22KHz
 
 
 always @ (posedge CLK_50M) 
