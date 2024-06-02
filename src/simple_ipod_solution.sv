@@ -228,25 +228,31 @@ wire Sample_Clk_Signal;
 
 logic [15:0] scope_sampling_clock_count;
 
-logic control_bus = SW[4:2];
-logic rst = control_bus[0];
-logic enable = control_bus[1];
-logic reverse = control_bus[2];
+logic [2:0] control_bus;
+assign control_bus = SW[4:2];
+
+logic reset;
+logic enable;
+logic reverse;
 
 
-logic [15:0] speed;
-assign speed = scope_sampling_clock_count;
+assign reset = control_bus[0];
+assign enable = control_bus[1];
+assign reverse = control_bus[2];
 
 logic flash_clk;
 assign flash_clk = TD_CLK27;
 
 
-wire            flash_mem_read;
-wire            flash_mem_waitrequest;
-wire    [22:0]  flash_mem_address;
-wire    [31:0]  flash_mem_readdata;
-wire            flash_mem_readdatavalid;
-wire    [3:0]   flash_mem_byteenable;
+logic flash_mem_waitrequest;
+logic [22:0] flash_mem_address;
+logic [31:0] flash_mem_readdata;
+logic flash_mem_readdatavalid;
+logic [3:0] flash_mem_byteenable;
+logic flash_mem_write;
+logic [31:0] flash_mem_writedata;
+logic flash_mem_read;
+logic [5:0] flash_mem_burstcount;
 
 
 assign flash_mem_write = 1'b0;
@@ -255,16 +261,15 @@ assign flash_mem_burstcount = 6'b000001;
 assign flash_mem_read = 1'b1;
 
 
-
 flash flash_inst (
     .clk_clk                 (CLK_50M),
     .reset_reset_n           (1'b1),
     .flash_mem_write         (1'b0),
-    .flash_mem_burstcount    (1'b1),
+    .flash_mem_burstcount    (flash_mem_burstcount),
     .flash_mem_waitrequest   (flash_mem_waitrequest),
     .flash_mem_read          (flash_mem_read),
     .flash_mem_address       (flash_mem_address),
-    .flash_mem_writedata     (),
+    .flash_mem_writedata     (flash_mem_writedata),
     .flash_mem_readdata      (flash_mem_readdata),
     .flash_mem_readdatavalid (flash_mem_readdatavalid),
     .flash_mem_byteenable    (flash_mem_byteenable)
@@ -277,10 +282,10 @@ wire [7:0] audio_data;
 
 flashdriver driver(
     .clk(flash_clk),
-    .reset(control_bus[0]),
-    .enable(control_bus[1]),
-    .reverse(control_bus[2]),
-    .speed(speed),
+    .reset(reset),
+    .enable(enable),
+    .reverse(reverse),
+    .count(scope_sampling_clock_count),
     .flash_mem_waitrequest(flash_mem_waitrequest),
     .flash_mem_readdata(flash_mem_readdata),
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
@@ -290,8 +295,6 @@ flashdriver driver(
 
 
 assign Sample_Clk_Signal = Clock_1KHz;
-
-
 
 
 //======================================================================================
@@ -587,7 +590,8 @@ speed_reg_control_inst
 .speed_control_val(speed_control_val)
 );
 
-parameter [15:0] default_scope_sampling_clock_count = 44_000; //44KHz, being passed not as count but as freq reading to my clk divider
+parameter [15:0] default_scope_sampling_clock_count = 614; //44KHz baseline, being passed not as count but as freq reading to my clk divider
+
 
 always @ (posedge CLK_50M) 
 begin
@@ -605,6 +609,7 @@ SevenSegmentDisplayDecoder SevenSegmentDisplayDecoder_inst2(.ssOut(Seven_Seg_Val
 SevenSegmentDisplayDecoder SevenSegmentDisplayDecoder_inst3(.ssOut(Seven_Seg_Val[3]), .nIn(Seven_Seg_Data[3]));
 SevenSegmentDisplayDecoder SevenSegmentDisplayDecoder_inst4(.ssOut(Seven_Seg_Val[4]), .nIn(Seven_Seg_Data[4]));
 SevenSegmentDisplayDecoder SevenSegmentDisplayDecoder_inst5(.ssOut(Seven_Seg_Val[5]), .nIn(Seven_Seg_Data[5]));
+
 
 assign HEX0 = Seven_Seg_Val[0];
 assign HEX1 = Seven_Seg_Val[1];

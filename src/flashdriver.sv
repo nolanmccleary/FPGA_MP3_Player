@@ -1,7 +1,6 @@
 module flashdriver
     #(
-        parameter WIDTH = 16,
-        parameter DRIVER_FREQ = 27_000
+        parameter WIDTH = 16
     )
     (
         /////////////////////////////////////////////////
@@ -16,17 +15,21 @@ module flashdriver
         input logic clk,
         input logic enable,
         input logic reverse,
-        input logic [WIDTH-1:0] speed,
+        input logic [WIDTH-1:0] count,
 
-        output logic [7:0] audio_out
+        output logic [7:0] audio_out,
+
+        ///////////////////////////////////////////OUTPUTS FOR DEBUGGING
+        output logic fetch_clock_tap
     );
     
     logic fetch_clock;
+    assign fetch_clock_tap = fetch_clock; 
 
-    clock_divider #(.WIDTH(WIDTH), .CLOCK_FREQ(DRIVER_FREQ)) divider(
+    clock_divider #(.WIDTH(WIDTH)) divider(
         .clk(clk), 
         .enable(enable), 
-        .freq_hertz(speed), 
+        .clk_count(count), 
         .clk_out(fetch_clock)
     );
 

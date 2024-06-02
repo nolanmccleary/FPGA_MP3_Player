@@ -1,35 +1,34 @@
+//count-based clock divider
+
 module clock_divider
     #(
-        parameter CLOCK_FREQ = 50_000_000,
         parameter WIDTH = 32
     )
     (
         input logic clk,
         input logic enable, 
-        input logic [WIDTH-1:0] freq_hertz, 
+        input logic [WIDTH-1:0] clk_count, 
         output logic clk_out
     );
 
-    integer pulseCount;
-    integer pulseLimit;
-    
-    initial begin
-        pulseCount = 0;
-        out = 0;
-    end
+    logic [31:0] pulseCount;
+    logic [31:0] pulseLimit;
 
     always_ff @( posedge clk ) begin
         if(enable) begin
-            pulseLimit <= ((CLOCK_FREQ/freq_hertz)/2);
+            pulseLimit <= clk_count;
         
             if (pulseCount >= pulseLimit) begin
-                out <= ~out;
+                clk_out <= ~clk_out;
                 pulseCount <= 0;    
             end
             
             else pulseCount <= pulseCount + 1;
         end
         
-        else out <= 0;
+        else begin
+            pulseCount <= 0;
+            clk_out <= 0;
+        end
     end
 endmodule

@@ -20,7 +20,7 @@ module address_select
     always_comb begin
         case(curr_byte)
             FIRST: begin
-                if(rev) begin
+                if(reverse) begin
                     next_word = curr_word - WORD_DELTA;
                     next_byte = FOURTH;
                 end else begin
@@ -31,7 +31,7 @@ module address_select
 
             SECOND: begin
                 next_word = curr_word;
-                if(rev) begin
+                if(reverse) begin
                     next_byte = FIRST;
                 end else begin
                     next_byte = THIRD;
@@ -40,7 +40,7 @@ module address_select
 
             THIRD: begin
                 next_word = curr_word;
-                if(rev) begin
+                if(reverse) begin
                     next_byte = SECOND;
                 end else begin
                     next_byte = FOURTH;
@@ -48,7 +48,7 @@ module address_select
             end
 
             FOURTH: begin
-                if(rev) begin
+                if(reverse) begin
                     next_word = curr_word;
                     next_byte = THIRD;
                 end else begin
@@ -56,7 +56,7 @@ module address_select
                     next_byte = FIRST;
                 end
             end
-            
+
             default: begin
                 next_word = curr_word;
                 next_byte = curr_byte;
