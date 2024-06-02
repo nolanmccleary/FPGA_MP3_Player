@@ -9,9 +9,8 @@ module flashdriver
         input logic flash_mem_readdata, 
         input logic flash_mem_readdatavalid,
 
-        output logic flash_mem_address,
+        output logic [22:0] flash_mem_address,
         ////////////////////////////////////////////////
-
 
         input logic reset,
         input logic clk,

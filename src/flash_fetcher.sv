@@ -1,4 +1,4 @@
-module flash_fetcher //TODO: Rework for BIG CHUNK
+module flash_fetcher 
     #(
         parameter BASE = 0,
         parameter MAX_OFFSET = 16'h7FFF
@@ -9,7 +9,7 @@ module flash_fetcher //TODO: Rework for BIG CHUNK
         input logic flash_mem_readdata, 
         input logic flash_mem_readdatavalid,
 
-        output logic flash_mem_address;
+        output logic [22:0] flash_mem_address;
         /////////////////////////////////////////////
 
         input logic reset,
@@ -32,36 +32,30 @@ module flash_fetcher //TODO: Rework for BIG CHUNK
     address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse)); //update address
     
     always_comb begin
-        if(reset)begin //reset check
-            curr_word = BASE;
-            curr_byte = 2'b00;
+        flash_data = flash_mem_readdatavalid? flash_mem_readdata : 32'b0;
+        case(curr_byte) 
+            2'b00: audio_slice = flash_data[7:0];
+            2'b01: audio_slice = flash_data[15:8];
+            2'b10: audio_slice = flash_data[23:16];
+            2'b11: audio_slice = flash_data[31:24];
+            default: audio_slice = 8'b0;
+        endcase
+    end
+
+    always_ff @(posedge fetch_clock) begin
+        if(reset || (next_word > BASE + MAX_OFFSET)) begin //reset/out of bounds check
+            curr_word <= BASE;
+            curr_byte <= 2'b00;
+            flash_mem_address <= BASE; // Initialize flash_mem_address during reset
+            audio_out <= 8'b0; // Initialize audio_out during reset
         end 
         
-        else if(curr_word > BASE + MAX_OFFSET) begin //out of bounds check
-            curr_word = BASE;
-            curr_byte = 2'b00;
-        end 
-        
-        else begin    
-            flash_data = flash_mem_readdatavalid? flash_mem_readdata : 32'b0;
-            case(curr_byte)
-                2'b00: audio_slice = flash_data[7:0];
-                2'b01: audio_slice = flash_data[15:8];
-                2'b10: audio_slice = flash_data[23:16];
-                2'b11: audio_slice = flash_data[31:24];
-            endcase
+        else begin
+            curr_word <= next_word;
+            curr_byte <= next_byte;
+            flash_mem_address <= curr_word;
+            audio_out <= audio_slice;
         end
     end
-
-
-    always_ff @(posedge fetchClk) begin
-        flash_mem_address <= curr_word;
-        
-        curr_word <= next_word;
-        curr_byte <= next_byte;
-        
-        audio_out <= audio_slice;
-    end
-
 endmodule
 

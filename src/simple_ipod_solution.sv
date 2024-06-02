@@ -237,21 +237,8 @@ logic reverse = control_bus[2];
 logic [15:0] speed;
 assign speed = scope_sampling_clock_count;
 
-logic sample_clk;
-assign sample_clk = TD_CLK27;
-
-
-
-
-
-
-
-
-
-
-
-
-
+logic flash_clk;
+assign flash_clk = TD_CLK27;
 
 
 wire            flash_mem_read;
@@ -284,18 +271,26 @@ flash flash_inst (
 );
             
 
+//Audio Generation Signal
+//Note that the audio needs signed data - so convert 1 bit to 8 bits signed
+wire [7:0] audio_data;
 
-
-
-
-
+flashdriver driver(
+    .clk(flash_clk),
+    .reset(control_bus[0]),
+    .enable(control_bus[1]),
+    .reverse(control_bus[2]),
+    .speed(speed),
+    .flash_mem_waitrequest(flash_mem_waitrequest),
+    .flash_mem_readdata(flash_mem_readdata),
+    .flash_mem_readdatavalid(flash_mem_readdatavalid),
+    .flash_mem_address(flash_mem_address),
+    .audio_out(audio_data)
+);
 
 
 assign Sample_Clk_Signal = Clock_1KHz;
 
-//Audio Generation Signal
-//Note that the audio needs signed data - so convert 1 bit to 8 bits signed
-wire [7:0] audio_data = {~Sample_Clk_Signal,{7{Sample_Clk_Signal}}}; //generate signed sample audio signal
 
 
 
@@ -433,16 +428,6 @@ scope_capture LCD_scope_channelB
 */
 
 assign scope_channelB = control_bus;
-
-
-
-
-
-
-
-
-
-
 
 
 //The LCD scope and display

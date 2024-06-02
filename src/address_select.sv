@@ -56,6 +56,11 @@ module address_select
                     next_byte = FIRST;
                 end
             end
+            
+            default: begin
+                next_word = curr_word;
+                next_byte = curr_byte;
+            end
         endcase
     end
 endmodule
