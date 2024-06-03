@@ -229,7 +229,7 @@ wire Sample_Clk_Signal;
 logic [15:0] scope_sampling_clock_count;
 
 logic [2:0] control_bus;
-assign control_bus = SW[4:2];
+assign control_bus = SW[2:0];
 
 logic reset;
 logic enable;
@@ -242,7 +242,7 @@ assign reverse = control_bus[2];
 
 logic flash_clk;
 assign flash_clk = TD_CLK27;
-
+logic fetch_clock_tap;
 
 logic flash_mem_waitrequest;
 logic [22:0] flash_mem_address;
@@ -290,11 +290,13 @@ flashdriver driver(
     .flash_mem_readdata(flash_mem_readdata),
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
     .flash_mem_address(flash_mem_address),
-    .audio_out(audio_data)
+    .audio_out(audio_data),
+    .fetch_clock_tap(fetch_clock_tap),
+    .out_byte(out_byte)
 );
 
 
-assign Sample_Clk_Signal = Clock_1KHz;
+assign Sample_Clk_Signal = fetch_clock_tap;
 
 
 //======================================================================================
@@ -430,7 +432,13 @@ scope_capture LCD_scope_channelB
 .reset(1'b1));
 */
 
-assign scope_channelB = control_bus;
+logic [1:0] out_byte;
+
+assign scope_channelB [2:0] = control_bus;
+assign scope_channelB [4:3] = out_byte;
+assign scope_channelB [13] = flash_mem_readdatavalid;
+assign scope_channelB [14] = flash_mem_waitrequest;
+assign scope_channelB [15] = flash_mem_address[0];
 
 
 //The LCD scope and display

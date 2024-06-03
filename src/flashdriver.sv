@@ -20,7 +20,8 @@ module flashdriver
         output logic [7:0] audio_out,
 
         ///////////////////////////////////////////OUTPUTS FOR DEBUGGING
-        output logic fetch_clock_tap
+        output logic fetch_clock_tap,
+        output logic [1:0] out_byte
     );
     
     logic fetch_clock;
@@ -43,7 +44,8 @@ module flashdriver
         .flash_mem_waitrequest(flash_mem_waitrequest),
         .flash_mem_readdata(flash_mem_readdata),
         .flash_mem_readdatavalid(flash_mem_readdatavalid),
-        .flash_mem_address(flash_mem_address)
+        .flash_mem_address(flash_mem_address),
+        .out_byte(out_byte)
     );    
 
 

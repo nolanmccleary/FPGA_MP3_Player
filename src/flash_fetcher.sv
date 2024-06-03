@@ -16,7 +16,11 @@ module flash_fetcher
         input logic fetch_clock,
         input logic reverse,
 
-        output logic [7:0] audio_out
+        output logic [7:0] audio_out,
+
+        ///////////////////////////DEBUG
+        output logic [1:0] out_byte
+
     );
 
 
@@ -28,6 +32,9 @@ module flash_fetcher
 
     logic [31:0] flash_data;
     logic [7:0] audio_slice;
+
+
+    assign out_byte = curr_byte;
 
     address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse)); //update address
     
@@ -50,6 +57,15 @@ module flash_fetcher
             audio_out <= 8'b0; // Initialize audio_out during reset
         end 
         
+        
+        else if(flash_mem_waitrequest) begin
+            curr_word <= curr_word;
+            curr_byte <= curr_byte;
+            flash_mem_address <= curr_word;
+            audio_out <= audio_slice;
+        end
+        
+
         else begin
             curr_word <= next_word;
             curr_byte <= next_byte;
