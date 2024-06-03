@@ -281,7 +281,8 @@ flash flash_inst (
 wire [7:0] audio_data;
 
 flashdriver driver(
-    .clk(flash_clk),
+    .address_clk(TD_CLK27),
+    .reader_clk(CLK_50M),
     .reset(reset),
     .enable(enable),
     .reverse(reverse),

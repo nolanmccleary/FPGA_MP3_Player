@@ -4,25 +4,17 @@ module flash_fetcher
         parameter MAX_OFFSET = 16'h7FFF
     )
     (
-        //////////////////////////////////////////////
-        input logic flash_mem_waitrequest,
-        input logic flash_mem_readdata, 
-        input logic flash_mem_readdatavalid,
-
-        output logic [22:0] flash_mem_address,
-        /////////////////////////////////////////////
-
         input logic reset,
         input logic fetch_clock,
         input logic reverse,
 
-        output logic [7:0] audio_out,
+        input logic flash_mem_waitrequest,
+        input logic [31:0] flash_mem_readdata, 
+        input logic flash_mem_readdatavalid,
 
-        ///////////////////////////DEBUG
+        output logic [22:0] flash_mem_address,
         output logic [1:0] out_byte
-
     );
-
 
     logic [22:0] curr_word;
     logic [22:0] next_word;
@@ -30,48 +22,22 @@ module flash_fetcher
     logic [1:0] curr_byte;
     logic [1:0] next_byte;
 
-    logic [31:0] flash_data;
-    logic [7:0] audio_slice;
-
-
-    assign out_byte = curr_byte;
-
-    address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse)); //update address
     
-    always_comb begin
-        flash_data = flash_mem_readdatavalid? flash_mem_readdata : 32'b0;
-        case(curr_byte) 
-            2'b00: audio_slice = flash_data[7:0];
-            2'b01: audio_slice = flash_data[15:8];
-            2'b10: audio_slice = flash_data[23:16];
-            2'b11: audio_slice = flash_data[31:24];
-            default: audio_slice = 8'b0;
-        endcase
-    end
+    address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse), .flash_mem_waitrequest(flash_mem_waitrequest)); //update address
 
     always_ff @(posedge fetch_clock) begin
         if(reset || (next_word > BASE + MAX_OFFSET)) begin //reset/out of bounds check
             curr_word <= BASE;
             curr_byte <= 2'b00;
-            flash_mem_address <= BASE; // Initialize flash_mem_address during reset
-            audio_out <= 8'b0; // Initialize audio_out during reset
-        end 
-        
-        
-        else if(flash_mem_waitrequest) begin
-            curr_word <= curr_word;
-            curr_byte <= curr_byte;
-            flash_mem_address <= curr_word;
-            audio_out <= audio_slice;
-        end
-        
-
-        else begin
+            flash_mem_address <= curr_word; 
+        end else begin
             curr_word <= next_word;
             curr_byte <= next_byte;
             flash_mem_address <= curr_word;
-            audio_out <= audio_slice;
         end
     end
+
+    assign out_byte = curr_byte;
+
 endmodule
 
