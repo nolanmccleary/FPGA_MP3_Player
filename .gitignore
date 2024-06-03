@@ -7,7 +7,6 @@
 *.pin
 *.sof
 *.qdf
-*.qpf
 *.done
 *.cdf
 *.bak
