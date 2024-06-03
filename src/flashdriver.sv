@@ -3,66 +3,53 @@ module flashdriver
         parameter WIDTH = 16
     )
     (
-        /////////////////////////////////////////////////
-        input logic flash_mem_waitrequest,
-        input logic flash_mem_readdata, 
-        input logic flash_mem_readdatavalid,
-        ////////////////////////////////////////////////
-
-        input logic reset,
         input logic address_clk,
-        input logic reader_clk,
-        input logic enable,
+        input logic sample_clk,
+        input logic [31:0] address_clk_count,
+        
+        input logic reset, //resets read status and adress position
+        input logic enable, //shuts off address driver clock
         input logic reverse,
-        input logic [WIDTH-1:0] count,
 
-        ///////////////////////////////////////////OUTPUTS FOR DEBUGGING
+        input logic flash_mem_readdatavalid,
+        input logic flash_mem_waitrequest,
+        input logic [31:0] flash_mem_readdata,
+
         output logic fetch_clock_tap,
-        output logic [1:0] out_byte,
 
+        output logic flash_mem_read,
         output logic [22:0] flash_mem_address,
-        output logic [7:0] audio_out
+        output logic [7:0] audio_out,
+        output logic valid_read_flag
     );
     
     logic fetch_clock;
-    assign fetch_clock_tap = fetch_clock; //fetch_clock_tap used here for debugger
-
-    logic [1:0] curr_byte;
-    assign out_byte = curr_byte; //out_byte used here for debugger
+    assign fetch_clock_tap = fetch_clock;
 
     logic [31:0] flash_data;
-    logic [7:0] audio_data;
 
     clock_divider #(.WIDTH(WIDTH)) divider(
         .clk(address_clk), 
         .enable(enable), 
-        .clk_count(count), 
+        .clk_count(address_count), 
         .clk_out(fetch_clock)
     );
 
-    //FSM goes here;
-    flash_fetcher fetcher(
-        .reset(reset), 
-        .fetch_clock(fetch_clock), 
-        .reverse(reverse),  
-
-        .flash_mem_waitrequest(flash_mem_waitrequest),
-        .flash_mem_readdata(flash_mem_readdata),
-        .flash_mem_readdatavalid(flash_mem_readdatavalid),
-        
-        .flash_mem_address(flash_mem_address),
-        .out_byte(curr_byte)
-    );
-
     flash_reader reader(
-        .reader_clk(reader_clk),
-        .flash_mem_waitrequest(flash_mem_waitrequest),
+        .reset(reset),
+        .sample_clk(sample_clk),
+        .address_clk(fetch_clock),
         .flash_mem_readdatavalid(flash_mem_readdatavalid),
         .flash_mem_readdata(flash_mem_readdata),
-
+        .flash_mem_read(flash_mem_read),
+        .flash_mem_address(flash_mem_address),
         .flash_data(flash_data)
     );
 
+    assign audio_out = flash_data[31:25];
+    assign flash_mem_address = 23'h7EFE;
+
+    /*
     always_comb begin
         case(curr_byte) 
             2'b00: audio_data = flash_data[7:0];
@@ -77,5 +64,6 @@ module flashdriver
         if(enable) audio_out <= audio_data;
         else audio_out <= 8'b0;
     end
+    */
 
 endmodule

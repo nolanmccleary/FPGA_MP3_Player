@@ -234,32 +234,31 @@ assign control_bus = SW[2:0];
 logic reset;
 logic enable;
 logic reverse;
-
-
 assign reset = control_bus[0];
 assign enable = control_bus[1];
 assign reverse = control_bus[2];
 
-logic flash_clk;
-assign flash_clk = TD_CLK27;
-logic fetch_clock_tap;
 
-logic flash_mem_waitrequest;
-logic [22:0] flash_mem_address;
-logic [31:0] flash_mem_readdata;
-logic flash_mem_readdatavalid;
-logic [3:0] flash_mem_byteenable;
 logic flash_mem_write;
 logic [31:0] flash_mem_writedata;
-logic flash_mem_read;
 logic [5:0] flash_mem_burstcount;
-
-
 assign flash_mem_write = 1'b0;
 assign flash_mem_writedata = 32'b0;
 assign flash_mem_burstcount = 6'b000001;
-assign flash_mem_read = 1'b1;
+assign audio_data = flash_mem_readdata[31:25];
 
+
+
+logic flash_mem_waitrequest;
+logic flash_mem_readdatavalid;
+logic [31:0] flash_mem_readdata;
+
+logic flash_mem_read;
+logic [22:0] flash_mem_address;
+logic [3:0] flash_mem_byteenable;
+
+
+assign flash_mem_byteenable = 4'b1111; //can change for byteselect later
 
 flash flash_inst (
     .clk_clk                 (CLK_50M),
@@ -274,7 +273,34 @@ flash flash_inst (
     .flash_mem_readdatavalid (flash_mem_readdatavalid),
     .flash_mem_byteenable    (flash_mem_byteenable)
 );
-            
+
+logic valid_read_flag;
+
+/*        
+
+
+always_ff @(posedge CLK_50M) begin
+    if(reset) begin
+        flash_mem_read <= 0;
+        valid_read_flag <= 0;
+    end
+    else begin
+        if (~valid_read_flag) begin
+            flash_mem_read <= 1;
+            valid_read_flag <= 0;
+        end
+        if(flash_mem_readdatavalid) begin
+            valid_read_flag <= 1;
+            flash_mem_read <= 0;
+        end
+    end
+end
+
+*/
+
+
+
+
 
 //Audio Generation Signal
 //Note that the audio needs signed data - so convert 1 bit to 8 bits signed
@@ -282,21 +308,22 @@ wire [7:0] audio_data;
 
 flashdriver driver(
     .address_clk(TD_CLK27),
-    .reader_clk(CLK_50M),
+    .sample_clk(CLK_50M),
     .reset(reset),
     .enable(enable),
     .reverse(reverse),
-    .count(scope_sampling_clock_count),
+    .address_clk_count(scope_sampling_clock_count),
     .flash_mem_waitrequest(flash_mem_waitrequest),
     .flash_mem_readdata(flash_mem_readdata),
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
     .flash_mem_address(flash_mem_address),
     .audio_out(audio_data),
     .fetch_clock_tap(fetch_clock_tap),
-    .out_byte(out_byte)
+    .out_byte(out_byte),
+    .valid_read_flag(valid_read_flag)
 );
 
-
+logic fetch_clock_tap;
 assign Sample_Clk_Signal = fetch_clock_tap;
 
 
@@ -435,13 +462,11 @@ scope_capture LCD_scope_channelB
 
 logic [1:0] out_byte;
 
-assign scope_channelB [2:0] = control_bus;
-assign scope_channelB [4:3] = out_byte;
-assign scope_channelB [13] = flash_mem_readdatavalid;
-assign scope_channelB [14] = flash_mem_waitrequest;
-assign scope_channelB [15] = flash_mem_address[0];
-
-
+assign scope_channelB [7:0] = audio_data;
+assign scope_channelB [8] = flash_mem_waitrequest;
+assign scope_channelB [9] = flash_mem_readdatavalid;
+assign scope_channelB [12:10] = control_bus;
+assign scope_channelB [13] = valid_read_flag;
 //The LCD scope and display
 LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
 					    //LCD control signals
