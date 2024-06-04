@@ -21,7 +21,7 @@ module flash_reader
 
     posedge_detector detector(.rst(reset), .clk(sample_clk), .target(address_clk), .out(address_switch));
 
-/*
+
     always_ff @(posedge sample_clk) begin
         if(reset) begin
             valid_read <= 0;
@@ -48,12 +48,14 @@ module flash_reader
             end
         end
     end
-*/
 
+
+/*
 always_ff @(posedge sample_clk) begin
     if(reset) begin
         flash_mem_read <= 0;
         valid_read <= 0;
+        flash_data <= 32'b0;
     end
     else begin
         if (~valid_read_flag) begin
@@ -63,10 +65,11 @@ always_ff @(posedge sample_clk) begin
         if(flash_mem_readdatavalid) begin
             valid_read <= 1;
             flash_mem_read <= 0;
+            flash_data <= flash_mem_readdata;
         end
     end
 end
-
+*/
 
 
 endmodule

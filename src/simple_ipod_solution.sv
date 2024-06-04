@@ -278,7 +278,7 @@ logic valid_read_flag;
 logic valid_read_flag2;
     
 
-
+/*
 always_ff @(posedge CLK_50M) begin
     if(reset) begin
         flash_mem_read <= 0;
@@ -296,39 +296,35 @@ always_ff @(posedge CLK_50M) begin
     end
 end
 
+*/
 
 
+logic fetch_clock;
 
+logic [31:0] flash_data;
 
+clock_divider #(.WIDTH(16)) divider(
+    .clk(TD_CLK27), 
+    .enable(enable), 
+    .clk_count(scope_sampling_clock_count), 
+    .clk_out(fetch_clock)
+);
 
-
-//Audio Generation Signal
-//Note that the audio needs signed data - so convert 1 bit to 8 bits signed
-wire [7:0] audio_data;
-
-/*
-logic [7:0] audio_feed;
-
-flashdriver driver(
-    .address_clk(TD_CLK27),
-    .sample_clk(CLK_50M),
+flash_reader reader(
     .reset(reset),
-    .enable(enable),
-    .reverse(reverse),
-    .address_clk_count(scope_sampling_clock_count),
-    .flash_mem_waitrequest(flash_mem_waitrequest),
-    .flash_mem_readdata(flash_mem_readdata),
+    .sample_clk(CLK_50M),
+    .address_clk(fetch_clock),
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
-    .flash_mem_address(flash_mem_address),
-    .audio_out(audio_feed),
-    .fetch_clock_tap(fetch_clock_tap),
+    .flash_mem_readdata(flash_mem_readdata),
+    .flash_mem_read(flash_mem_read),
+    .flash_data(flash_data),
     .valid_read_flag(valid_read_flag)
 );
 
-logic fetch_clock_tap;
-assign Sample_Clk_Signal = fetch_clock_tap;
+assign flash_mem_address = 23'h7EFE;
 
-*/
+
+
 
 //======================================================================================
 // 
@@ -465,11 +461,14 @@ scope_capture LCD_scope_channelB
 
 logic [1:0] out_byte;
 
-assign scope_channelB [7:0] = audio_data;
+logic [7:0] audio_feed;
+assign audio_feed = flash_mem_readdata[31:25];
+
+assign scope_channelB [7:0] = audio_feed;
 assign scope_channelB [8] = flash_mem_waitrequest;
 assign scope_channelB [9] = flash_mem_readdatavalid;
 assign scope_channelB [12:10] = control_bus;
-assign scope_channelB [13] = valid_read_flag2;
+assign scope_channelB [13] = valid_read_flag;
 //The LCD scope and display
 LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
 					    //LCD control signals
@@ -687,7 +686,7 @@ assign actual_7seg_output =  scope_sampling_clock_count;
 
 
 
-
+logic [7:0] audio_data;
 //=======================================================================================================================
 //
 //   Audio controller code - do not touch
