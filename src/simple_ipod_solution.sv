@@ -245,7 +245,6 @@ logic [5:0] flash_mem_burstcount;
 assign flash_mem_write = 1'b0;
 assign flash_mem_writedata = 32'b0;
 assign flash_mem_burstcount = 6'b000001;
-assign audio_data = flash_mem_readdata[31:25];
 
 
 
@@ -317,11 +316,28 @@ flash_reader reader(
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
     .flash_mem_readdata(flash_mem_readdata),
     .flash_mem_read(flash_mem_read),
-    .flash_data(flash_data),
     .valid_read_flag(valid_read_flag)
 );
 
-assign flash_mem_address = 23'h7EFE;
+
+logic [1:0] out_byte;
+
+flash_fsm fsm(.clk(fetch_clock), .reset(reset), .reverse(reverse), .flash_mem_waitrequest(flash_mem_waitrequest), .out_byte(out_byte), .flash_mem_address(flash_mem_address));
+
+
+always_comb begin 
+    case(out_byte)
+        2'b00: audio_data = flash_mem_readdata[7:0];
+        2'b01: audio_data = flash_mem_readdata[15:8];
+        2'b10: audio_data = flash_mem_readdata[23:16];
+        2'b11: audio_data = flash_mem_readdata[31:24];
+        default: audio_data = flash_mem_readdata[7:0];
+    endcase
+end
+
+
+
+
 
 
 
@@ -459,16 +475,15 @@ scope_capture LCD_scope_channelB
 .reset(1'b1));
 */
 
-logic [1:0] out_byte;
 
 logic [7:0] audio_feed;
-assign audio_feed = flash_mem_readdata[31:25];
 
-assign scope_channelB [7:0] = audio_feed;
+assign scope_channelB [7:0] = audio_data;
 assign scope_channelB [8] = flash_mem_waitrequest;
 assign scope_channelB [9] = flash_mem_readdatavalid;
-assign scope_channelB [12:10] = control_bus;
-assign scope_channelB [13] = valid_read_flag;
+assign scope_channelB [11] = valid_read_flag;
+assign scope_channelB [14:13] = out_byte;
+assign scope_channelB[15] = flash_mem_address[0];
 //The LCD scope and display
 LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
 					    //LCD control signals

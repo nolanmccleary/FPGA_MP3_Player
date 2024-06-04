@@ -19,10 +19,6 @@ module address_select
 
 
     always_comb begin
-        if(flash_mem_waitrequest) begin
-            next_byte = curr_byte;
-            next_word = curr_word;
-        end else begin
             case(curr_byte)
                 FIRST: begin
                     if(reverse) begin
@@ -68,5 +64,4 @@ module address_select
                 end
             endcase
         end
-    end
 endmodule
