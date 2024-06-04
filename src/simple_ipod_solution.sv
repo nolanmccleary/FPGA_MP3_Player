@@ -275,28 +275,28 @@ flash flash_inst (
 );
 
 logic valid_read_flag;
-
-/*        
+logic valid_read_flag2;
+    
 
 
 always_ff @(posedge CLK_50M) begin
     if(reset) begin
         flash_mem_read <= 0;
-        valid_read_flag <= 0;
+        valid_read_flag2 <= 0;
     end
     else begin
-        if (~valid_read_flag) begin
+        if (~valid_read_flag2) begin
             flash_mem_read <= 1;
-            valid_read_flag <= 0;
+            valid_read_flag2 <= 0;
         end
         if(flash_mem_readdatavalid) begin
-            valid_read_flag <= 1;
+            valid_read_flag2 <= 1;
             flash_mem_read <= 0;
         end
     end
 end
 
-*/
+
 
 
 
@@ -305,6 +305,9 @@ end
 //Audio Generation Signal
 //Note that the audio needs signed data - so convert 1 bit to 8 bits signed
 wire [7:0] audio_data;
+
+/*
+logic [7:0] audio_feed;
 
 flashdriver driver(
     .address_clk(TD_CLK27),
@@ -317,15 +320,15 @@ flashdriver driver(
     .flash_mem_readdata(flash_mem_readdata),
     .flash_mem_readdatavalid(flash_mem_readdatavalid),
     .flash_mem_address(flash_mem_address),
-    .audio_out(audio_data),
+    .audio_out(audio_feed),
     .fetch_clock_tap(fetch_clock_tap),
-    .out_byte(out_byte),
     .valid_read_flag(valid_read_flag)
 );
 
 logic fetch_clock_tap;
 assign Sample_Clk_Signal = fetch_clock_tap;
 
+*/
 
 //======================================================================================
 // 
@@ -466,7 +469,7 @@ assign scope_channelB [7:0] = audio_data;
 assign scope_channelB [8] = flash_mem_waitrequest;
 assign scope_channelB [9] = flash_mem_readdatavalid;
 assign scope_channelB [12:10] = control_bus;
-assign scope_channelB [13] = valid_read_flag;
+assign scope_channelB [13] = valid_read_flag2;
 //The LCD scope and display
 LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
 					    //LCD control signals

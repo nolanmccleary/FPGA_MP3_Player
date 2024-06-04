@@ -42,8 +42,8 @@ module flashdriver
         .flash_mem_readdatavalid(flash_mem_readdatavalid),
         .flash_mem_readdata(flash_mem_readdata),
         .flash_mem_read(flash_mem_read),
-        .flash_mem_address(flash_mem_address),
-        .flash_data(flash_data)
+        .flash_data(flash_data),
+        .valid_read_flag(valid_read_flag)
     );
 
     assign audio_out = flash_data[31:25];
