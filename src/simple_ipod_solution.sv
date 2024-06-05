@@ -641,7 +641,7 @@ speed_reg_control_inst
 .speed_control_val(speed_control_val)
 );
 
-parameter [15:0] default_scope_sampling_clock_count = 614; //44KHz baseline, being passed not as count but as freq reading to my clk divider
+parameter [15:0] default_scope_sampling_clock_count = 330; //44KHz baseline, being passed not as count but as freq reading to my clk divider
 
 
 always @ (posedge CLK_50M) 
