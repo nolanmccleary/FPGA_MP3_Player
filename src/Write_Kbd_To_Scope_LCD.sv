@@ -43,6 +43,7 @@ parameter scope_info_bits_per_byte = 8, parameter scope_info_counter_bits = 4)
 	 reg [scope_info_bits_per_byte-1:0] scope_info_reg[scope_info_bytes-1:0];
 	 output wire [15:0] debug;
 	 
+
     //State machine states	 
 	 parameter init_state                   = 10'b000000_0000;
 	 parameter init_scope_LCD_reg           = 10'b010000_0001;

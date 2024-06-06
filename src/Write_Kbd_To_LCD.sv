@@ -23,7 +23,7 @@ module Write_Kbd_To_LCD(kbd_data, kbd_ready, reset_kbd_data, start_LCD_writer, L
     input kbd_ready;
     output reset_kbd_data;
     output start_LCD_writer;
-	 output finish;
+	output finish;
     input LCD_writer_finished;
     input sm_clk;
     output [7:0] DB;
@@ -35,7 +35,7 @@ module Write_Kbd_To_LCD(kbd_data, kbd_ready, reset_kbd_data, start_LCD_writer, L
 	 parameter idle                   = 8'b0000_0000;
 	 parameter start_write_LCD_state  = 8'b0101_0001;
 	 parameter wait_write_LCD         = 8'b0100_0010;
-    parameter clear_kbd_data 		    = 8'b0010_0011;
+     parameter clear_kbd_data 		    = 8'b0010_0011;
 	 parameter finished               = 8'b1000_0101;
 		
 	 reg[7:0] state;
@@ -45,6 +45,9 @@ module Write_Kbd_To_LCD(kbd_data, kbd_ready, reset_kbd_data, start_LCD_writer, L
 	 assign finish = state[7];
 	 wire DB_sel = state[6];
 	 wire write_Yair_finish;
+
+	 logic actual_kbd_ready;
+
 	 assign DB = DB_sel ? {kbd_data[2],kbd_data[3],kbd_data[4],kbd_data[5],kbd_data[6],kbd_data[7],kbd_data[8],kbd_data[9]} : 8'h0;
 	 
 	 async_trap_and_reset make_kbd_ready_signal(.async_sig(kbd_ready), .outclk(sm_clk), .out_sync_sig(actual_kbd_ready), 

@@ -326,6 +326,52 @@ end
 
 
 
+wire [3:0] sync_SW;
+wire [23:0] sseg;
+    
+doublesync syncsw3(.indata(SW[3]),
+                      .outdata(sync_SW[3]),
+                          .clk(CLK_50M),
+                          .reset(1'b1));                
+                          
+
+doublesync syncsw2(.indata(SW[2]),
+                      .outdata(sync_SW[2]),
+                          .clk(CLK_50M),
+                          .reset(1'b1));    
+
+doublesync syncsw1(.indata(SW[1]),
+                      .outdata(sync_SW[1]),
+                          .clk(CLK_50M),
+                          .reset(1'b1)); 
+
+doublesync syncsw0(.indata(SW[0]),
+                      .outdata(sync_SW[0]),
+                          .clk(CLK_50M),
+                          .reset(1'b1));                          
+            
+picoblaze_template
+#(
+.clk_freq_in_hz(25000000)
+) 
+picoblaze_template_inst(
+                        .led(LED[7:0]),
+                        .clk(CLK_50M),
+                        .input_data({4'h0,sync_SW[3:0]}),
+								.sseg(sseg)
+                 );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
