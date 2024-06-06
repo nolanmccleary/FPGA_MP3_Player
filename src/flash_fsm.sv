@@ -5,6 +5,7 @@ module flash_fsm
     (
         input logic clk,
         input logic reset,
+        input logic enable,
         input logic reverse,
         input logic flash_mem_waitrequest,
 
@@ -17,23 +18,21 @@ module flash_fsm
     logic [1:0] curr_byte;
     logic [1:0] next_byte;
 
-
-    address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse), .flash_mem_waitrequest(flash_mem_waitrequest));
-
+    address_select sel(.curr_word(curr_word), .curr_byte(curr_byte), .next_word(next_word), .next_byte(next_byte), .reverse(reverse), .enable(enable), .flash_mem_waitrequest(flash_mem_waitrequest));
 
     always_ff @(posedge clk) begin
-        if(reset | next_word > BASE + MAX_OFFSET) begin
+        if(reset || next_word > BASE + MAX_OFFSET) begin
             curr_word <= BASE;
             curr_byte <= 2'b0;
-        end else begin
+        end
+        
+        else begin
             curr_word <= next_word;
             curr_byte <= next_byte;
         end
-        out_byte <= curr_byte;
-        flash_mem_address <= curr_word;
     end
 
-
-
+    assign out_byte = curr_byte;
+    assign flash_mem_address = curr_word;
 
 endmodule

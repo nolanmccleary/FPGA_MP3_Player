@@ -277,25 +277,6 @@ logic valid_read_flag;
 logic valid_read_flag2;
     
 
-/*
-always_ff @(posedge CLK_50M) begin
-    if(reset) begin
-        flash_mem_read <= 0;
-        valid_read_flag2 <= 0;
-    end
-    else begin
-        if (~valid_read_flag2) begin
-            flash_mem_read <= 1;
-            valid_read_flag2 <= 0;
-        end
-        if(flash_mem_readdatavalid) begin
-            valid_read_flag2 <= 1;
-            flash_mem_read <= 0;
-        end
-    end
-end
-
-*/
 
 
 logic fetch_clock;
@@ -304,7 +285,7 @@ logic [31:0] flash_data;
 
 clock_divider #(.WIDTH(16)) divider(
     .clk(TD_CLK27), 
-    .enable(enable), 
+    .enable(1'b1), 
     .clk_count(scope_sampling_clock_count), 
     .clk_out(fetch_clock)
 );
@@ -322,7 +303,15 @@ flash_reader reader(
 
 logic [1:0] out_byte;
 
-flash_fsm fsm(.clk(fetch_clock), .reset(reset), .reverse(reverse), .flash_mem_waitrequest(flash_mem_waitrequest), .out_byte(out_byte), .flash_mem_address(flash_mem_address));
+flash_fsm fsm(
+    .clk(fetch_clock), 
+    .reset(reset),
+    .enable(enable), 
+    .reverse(reverse), 
+    .flash_mem_waitrequest(flash_mem_waitrequest), 
+    .out_byte(out_byte), 
+    .flash_mem_address(flash_mem_address)
+);
 
 
 always_comb begin 
@@ -371,7 +360,7 @@ wire [7:0] kbd_received_ascii_code, kbd_scan_code;
 Kbd_ctrl Kbd_Controller(
 .kbd_clk(ps2c), 
 .kbd_data(ps2d),
- .clk(CLK_50M), 
+.clk(CLK_50M), 
 .scan_code(kbd_scan_code), 
 .reset_kbd_reg(~reset_kbd_data), 
 .data_ready(kbd_data_ready)
@@ -641,7 +630,7 @@ speed_reg_control_inst
 .speed_control_val(speed_control_val)
 );
 
-parameter [15:0] default_scope_sampling_clock_count = 330; //44KHz baseline, being passed not as count but as freq reading to my clk divider
+parameter [15:0] default_scope_sampling_clock_count = 307; //44KHz baseline, being passed not as count but as freq reading to my clk divider
 
 
 always @ (posedge CLK_50M) 

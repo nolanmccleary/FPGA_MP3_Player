@@ -4,6 +4,7 @@ module address_select
     )
     (
         input logic reverse,
+        input logic enable,
         input logic [22:0] curr_word,
         input logic [1:0] curr_byte,
         input logic flash_mem_waitrequest,
@@ -19,49 +20,56 @@ module address_select
 
 
     always_comb begin
-            case(curr_byte)
-                FIRST: begin
-                    if(reverse) begin
-                        next_word = curr_word - WORD_DELTA;
-                        next_byte = FOURTH;
-                    end else begin
+            if(enable) begin
+                case(curr_byte)
+                    FIRST: begin
+                        if(reverse) begin
+                            next_word = curr_word - WORD_DELTA;
+                            next_byte = FOURTH;
+                        end else begin
+                            next_word = curr_word;
+                            next_byte = SECOND;
+                        end
+                    end
+
+                    SECOND: begin
                         next_word = curr_word;
-                        next_byte = SECOND;
+                        if(reverse) begin
+                            next_byte = FIRST;
+                        end else begin
+                            next_byte = THIRD;
+                        end
                     end
-                end
 
-                SECOND: begin
-                    next_word = curr_word;
-                    if(reverse) begin
-                        next_byte = FIRST;
-                    end else begin
-                        next_byte = THIRD;
-                    end
-                end
-
-                THIRD: begin
-                    next_word = curr_word;
-                    if(reverse) begin
-                        next_byte = SECOND;
-                    end else begin
-                        next_byte = FOURTH;
-                    end
-                end
-
-                FOURTH: begin
-                    if(reverse) begin
+                    THIRD: begin
                         next_word = curr_word;
-                        next_byte = THIRD;
-                    end else begin
-                        next_word = curr_word + WORD_DELTA;
-                        next_byte = FIRST;
+                        if(reverse) begin
+                            next_byte = SECOND;
+                        end else begin
+                            next_byte = FOURTH;
+                        end
                     end
-                end
 
-                default: begin
-                    next_word = curr_word;
-                    next_byte = curr_byte;
-                end
-            endcase
+                    FOURTH: begin
+                        if(reverse) begin
+                            next_word = curr_word;
+                            next_byte = THIRD;
+                        end else begin
+                            next_word = curr_word + WORD_DELTA;
+                            next_byte = FIRST;
+                        end
+                    end
+
+                    default: begin
+                        next_word = curr_word;
+                        next_byte = curr_byte;
+                    end
+                endcase
+            end 
+            
+            else begin
+                next_word = curr_word;
+                next_byte = curr_byte;
+            end
         end
 endmodule
