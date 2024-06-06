@@ -349,7 +349,8 @@ doublesync syncsw0(.indata(SW[0]),
                       .outdata(sync_SW[0]),
                           .clk(CLK_50M),
                           .reset(1'b1));                          
-            
+
+//TODO: Replace current input data with audio_data (also an 8-bit bus), don't touch 7seg for now
 picoblaze_template
 #(
 .clk_freq_in_hz(25000000)

@@ -1,3 +1,5 @@
+//Module to synchronize external signal to clock
+
 module doublesync(indata,
 				  outdata,
 				  clk,
