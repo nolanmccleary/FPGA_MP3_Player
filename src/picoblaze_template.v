@@ -85,6 +85,24 @@ pacoblaze3 led_8seg_kcpsm
 //  --
 
 
+
+
+//TODO: change this 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Note that because we are using clock enable we DO NOT need to synchronize with clk
 
   always @ (posedge clk)
