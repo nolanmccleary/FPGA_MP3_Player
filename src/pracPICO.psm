@@ -1,116 +1,111 @@
-CONSTANT LED_port, 80               ;8 simple LEDs. Is an OUTPUT port.
+CONSTANT OUTPUT_PORT, 80               ;8 simple LEDs. Is an OUTPUT port.
 CONSTANT DATA_IN_PORT, 00	        ;input data port. this is an INPUT port.
 CONSTANT SSEG_PORT0, 40
 CONSTANT SSEG_PORT1, 20
 CONSTANT SSEG_PORT2, 10
 
 
-CONSTANT ISR_preserve_s0, 00        ;Preserve s0 contents during ISR
-CONSTANT ISR_preserve_s1, 01        ;Preserve s1 contents during ISR
-CONSTANT ISR_preserve_s2, 02        ;Preserve s2 contents during ISR
-CONSTANT ISR_preserve_s3, 03        ;Preserve s3 contents during ISR
+;CONSTANT ISR_preserve_heartbeat, 00        ;Preserve s0 contents during ISR
+;CONSTANT ISR_preserve_s1, 01        ;Preserve s1 contents during ISR
+;CONSTANT ISR_preserve_s2, 02        ;Preserve s2 contents during ISR
+;CONSTANT ISR_preserve_s3, 03        ;Preserve s3 contents during ISR
                     
 
-CONSTANT LED_pattern, 04
+CONSTANT DATA_OUT, 04
 CONSTANT delay_1us_constant, 0B
 
 
-NAMEREG sA, led_control_reg
+NAMEREG s0, input_reg
+NAMEREG s1, heartbeat_reg
+NAMEREG s2, sum_reg
+NAMEREG s3, carry_reg
+NAMEREG s4, counter_reg
+NAMEREG s5, msb_reg
+NAMEREG s6, output_reg
+NAMEREG sA, one_second_reg
 
-cold_start:     LOAD led_control_reg, 00                         ;clear 1 second counter and clear LEDs
-                STORE led_control_reg, LED_pattern               ;store s0 contents in led pattern memory block
-                OUTPUT led_control_reg, LED_port
-                ;ENABLE INTERRUPT
+
+
+
+
+;////////////////////////////////////////// INITIALIZATION BLOCK ///////////////////////////////////////////////////////////////
+cold_start:     LOAD heartbeat_reg, 00                         ;clear 1 second counter and clear LEDs
+                LOAD sum_reg, 00
+                LOAD carry_reg, 00
+                LOAD counter_reg, 00
+                LOAD msb_reg, 00
+                LOAD output_reg, 00
+
+                OUTPUT output_reg, OUTPUT_PORT
+                ENABLE INTERRUPT
+
+
+;////////////////////////////////////////////////// MAIN LOOP /////////////////////////////////////////////////////////////////////
 
 
 main_program:   CALL delay_1s
-                TEST led_control_reg, 01
+                TEST heartbeat_reg, 01
                 JUMP NZ, clear_led
                 CALL set_led
                 JUMP main_program
 
 
-clear_led:      LOAD led_control_reg, 00
-                STORE led_control_reg, LED_pattern
-                OUTPUT led_control_reg, LED_port
+
+;/////////////////////////////////////////// CONTROL BLOCK ///////////////////////////////////////////////////////////////////////
+
+
+clear_led:      LOAD heartbeat_reg, 00
                 JUMP main_program
 
 
 
-set_led:        LOAD led_control_reg, 01
-                STORE led_control_reg, LED_pattern
-                OUTPUT led_control_reg, LED_port
+set_led:        LOAD heartbeat_reg, 01
                 RETURN
 
 
 
 ;/////////////////////////////////////////     DELAY BLOCK START     //////////////////////////////////////////////////////////////
 
-delay_1us: LOAD s0, delay_1us_constant
-          wait_1us: SUB s0, 01
+delay_1us: LOAD sE, delay_1us_constant
+          wait_1us: SUB sE, 01
                     JUMP NZ, wait_1us
                     RETURN
 
 
-delay_40us: LOAD s1, 28                         ;40 x 1us = 40us
+delay_40us: LOAD sD, 28                         ;40 x 1us = 40us
          wait_40us: CALL delay_1us
-                    SUB s1, 01
+                    SUB sD, 01
                     JUMP NZ, wait_40us
                     RETURN
 
 
-delay_1ms: LOAD s2, 19                         ;25 x 40us = 1ms
+delay_1ms: LOAD sC, 19                         ;25 x 40us = 1ms
           wait_1ms: CALL delay_40us
-                    SUB s2, 01
+                    SUB sC, 01
                     JUMP NZ, wait_1ms
                     RETURN
 
 
-delay_20ms: LOAD s3, 14                         ;20 x 1ms = 20ms
-         wait_20ms: CALL delay_1ms
-                    SUB s3, 01
+delay_20ms: LOAD sB, 14                         ;20 x 1ms = 20ms
+          wait_20ms: CALL delay_1ms
+                    SUB sB, 01
                     JUMP NZ, wait_20ms
                     RETURN
 					
 
-delay_1s: LOAD s4, 32                         ;50 x 20ms = 1000ms
+delay_1s: LOAD one_second_reg, 32                         ;50 x 20ms = 1000ms
            wait_1s: CALL delay_20ms
-                    SUB s4, 01
+                    SUB one_second_reg, 01
                     JUMP NZ, wait_1s
                     RETURN
 
-;/////////////////////////////////////////////////////           DELAY BLOCK  END       ///////////////////////////////////////////////////////////////
+
+;////////////////////////////////////////////////////            ISR BLOCK              ////////////////////////////////////////////////////////////////
+
+ISR:  LOAD output_reg, heartbeat_reg
+      OUTPUT output_reg, OUTPUT_PORT
+      RETURNI ENABLE
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;//ISR:    STORE s0, ISR_preserve_s0           ;preserve register
- ; //      FETCH s0, LED_pattern               ;read current counter value
-   ;//     ADD s0, 01                          ;increment counter				   
-;
-    ; //   display_leds:   STORE s0, LED_pattern               ;store new counter value
-      ; //                 OUTPUT s0, LED_port                 ;display counter value on LEDs
-       ;//                 FETCH s0, ISR_preserve_s0           ;restore register
-       ; //                RETURNI ENABLE
-
-
-
-;//ADDRESS 3FF 
-;//JUMP ISR    //Interrupt vector for ISR
+ADDRESS 3FF 
+JUMP ISR    

@@ -4,7 +4,7 @@
 module 
 picoblaze_template
 #(
-parameter clk_freq_in_hz = 25000000
+parameter clk_freq_in_hz = 250000
 ) (
 				output reg[7:0] led,
 				input clk,
