@@ -325,7 +325,7 @@ always_comb begin
 end
 
 
-
+//TODO: kill the doublesync and SSEG stuff
 wire [3:0] sync_SW;
 wire [23:0] sseg;
     
@@ -350,17 +350,21 @@ doublesync syncsw0(.indata(SW[0]),
                           .clk(CLK_50M),
                           .reset(1'b1));                          
 
-//TODO: Replace current input data with audio_data (also an 8-bit bus), don't touch 7seg for now
-picoblaze_template
-#(
-.clk_freq_in_hz(25000000)
-) 
-picoblaze_template_inst(
+
+
+logic address_change_signal;
+posedge_detector pico_kicker(.rst(reset), .clk(CLK_50M), .target(fetch_clock), .out(address_change_signal));
+
+
+
+
+picoblaze_template picoblaze_template_inst(
                         .led(LED[7:0]),
                         .clk(CLK_50M),
-                        .input_data({4'h0,sync_SW[3:0]}),
-								.sseg(sseg)
-                 );
+                        .input_data(audio_data),
+						.sseg(sseg),
+                        .interrupt_line(address_change_signal)
+                    );
 
 
 

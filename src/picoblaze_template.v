@@ -1,17 +1,17 @@
 
 `default_nettype none
- `define USE_PACOBLAZE
+`define USE_PACOBLAZE
 module 
 picoblaze_template
 #(
-parameter clk_freq_in_hz = 250000
+parameter clk_count = 250000 //only used wiht test pulse
 ) (
-				output reg[7:0] led,
-				input clk,
-				input [7:0] input_data,
-			   output wire [23:0] sseg
-
-			     );
+		output reg[7:0] led,
+		input clk,
+    input wire interrupt_line,
+		input [7:0] input_data,
+		output wire [23:0] sseg
+	);
 
 
   
@@ -85,30 +85,12 @@ pacoblaze3 led_8seg_kcpsm
 //  --
 
 
-
-
-//TODO: change this 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Note that because we are using clock enable we DO NOT need to synchronize with clk
 
   always @ (posedge clk)
   begin
       //--divide 50MHz by 50,000,000 to form 1Hz pulses
-      if (int_count==(clk_freq_in_hz-1)) //clock enable
+      if (int_count==(clk_count-1)) //clock enable
 		begin
          int_count <= 0;
          event_1hz <= 1;
@@ -125,7 +107,7 @@ pacoblaze3 led_8seg_kcpsm
             interrupt <= 0;
       else
 		begin 
-		      if (event_1hz)   //clock enable
+		      if (interrupt_line)   //clock enable
       		      interrupt <= 1;
           		else
 		            interrupt <= interrupt;
