@@ -8,7 +8,7 @@ module pacoblaze_instruction_memory
            integer   index;
 
            initial begin
-              $readmemh("ledctrl.mem",memory);
+              $readmemh("pracpico.mem",memory);
            end
 		   
 		  assign     outdata = memory[addr];
