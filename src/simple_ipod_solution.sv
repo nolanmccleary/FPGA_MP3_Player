@@ -127,7 +127,7 @@ output                      DRAM_WE_N;
 logic CLK_50M;
 logic  [7:0] LED;
 assign CLK_50M =  CLOCK_50;
-assign LEDR[7:0] = LED[7:0];
+//assign LEDR[7:0] = LED[7:0];
 
 //Character definitions
 
@@ -356,10 +356,37 @@ logic address_change_signal;
 posedge_detector pico_kicker(.rst(reset), .clk(CLK_50M), .target(fetch_clock), .out(address_change_signal));
 
 
+logic heartbeat;
+logic [7:0] out_led;
+logic [3:0] raw_led;
+logic [7:0] formatted_signal;
+
+assign raw_led = out_led[4:1];
+assign heartbeat = out_led[0];
+
+
+always_comb begin
+    case(raw_led)
+        4'd0: formatted_signal = 8'b0;
+        4'd1: formatted_signal = 8'b1000_0000;
+        4'd2: formatted_signal = 8'b1100_0000;
+        4'd3: formatted_signal = 8'b1110_0000;
+        4'd4: formatted_signal = 8'b1111_0000;
+        4'd5: formatted_signal = 8'b1111_1000;
+        4'd6: formatted_signal = 8'b1111_1100;
+        4'd7: formatted_signal = 8'b1111_1110;
+        4'd8: formatted_signal = 8'b1111_1111;
+        default: formatted_signal = 8'b0;
+    endcase
+end
+
+assign LEDR = {formatted_signal, 1'b0, heartbeat};
+
+
 
 
 picoblaze_template picoblaze_template_inst(
-                        .led(LED[7:0]),
+                        .led(out_led),
                         .clk(CLK_50M),
                         .input_data(audio_data),
 						.sseg(sseg),
