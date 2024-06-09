@@ -5,12 +5,6 @@ CONSTANT SSEG_PORT1, 20
 CONSTANT SSEG_PORT2, 10
 
 
-;CONSTANT ISR_preserve_heartbeat, 00        ;Preserve s0 contents during ISR
-;CONSTANT ISR_preserve_s1, 01        ;Preserve s1 contents during ISR
-;CONSTANT ISR_preserve_s2, 02        ;Preserve s2 contents during ISR
-;CONSTANT ISR_preserve_s3, 03        ;Preserve s3 contents during ISR
-                    
-
 CONSTANT DATA_OUT, 04
 CONSTANT delay_1us_constant, 0B
 
@@ -23,9 +17,6 @@ NAMEREG s4, counter_reg
 NAMEREG s5, msb_reg
 NAMEREG s6, output_reg
 NAMEREG sA, one_second_reg
-
-
-
 
 
 ;////////////////////////////////////////// INITIALIZATION BLOCK ///////////////////////////////////////////////////////////////
@@ -45,8 +36,8 @@ cold_start:     LOAD heartbeat_reg, 00                         ;clear 1 second c
 
 main_program:   CALL delay_1s
                 TEST heartbeat_reg, 01
-                JUMP NZ, clear_led
-                CALL set_led
+                JUMP NZ, clear_heartbeat
+                CALL set_heartbeat
                 JUMP main_program
 
 
@@ -54,17 +45,79 @@ main_program:   CALL delay_1s
 ;/////////////////////////////////////////// CONTROL BLOCK ///////////////////////////////////////////////////////////////////////
 
 
-clear_led:      LOAD heartbeat_reg, 00
-                JUMP main_program
+clear_heartbeat:    LOAD heartbeat_reg, 00
+                    JUMP main_program
 
 
 
-set_led:        LOAD heartbeat_reg, 01
-                RETURN
+set_heartbeat:      LOAD heartbeat_reg, 01
+                    RETURN
 
 
+set_output:   LOAD msb_reg, carry_reg
+              AND msb_reg, 80           ;hex 0x80
+              JUMP NZ, case_msb_eight
 
-;/////////////////////////////////////////     DELAY BLOCK START     //////////////////////////////////////////////////////////////
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 40
+              JUMP NZ, case_msb_seven
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 20
+              JUMP NZ, case_msb_six
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 10
+              JUMP NZ, case_msb_five
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 08
+              JUMP NZ, case_msb_four
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 04
+              JUMP NZ, case_msb_three
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 02
+              JUMP NZ, case_msb_two
+
+              LOAD msb_reg, carry_reg
+              AND msb_reg, 01
+              JUMP NZ, case_msb_one
+
+              JUMP case_msb_zero
+
+
+case_msb_eight:   LOAD output_reg, 08
+                  JUMP msb_done
+
+case_msb_seven:   LOAD output_reg, 07
+                  JUMP msb_done
+
+case_msb_six:   LOAD output_reg, 06
+                  JUMP msb_done
+
+case_msb_five:   LOAD output_reg, 05
+                  JUMP msb_done
+            
+case_msb_four:   LOAD output_reg, 04
+                  JUMP msb_done
+
+case_msb_three:   LOAD output_reg, 03
+                  JUMP msb_done
+
+case_msb_two:   LOAD output_reg, 02
+                  JUMP msb_done
+
+case_msb_one:   LOAD output_reg, 01
+                  JUMP msb_done
+
+case_msb_zero:   LOAD output_reg, 00
+                  JUMP msb_done
+
+                    
+;/////////////////////////////////////////     DELAY BLOCK       //////////////////////////////////////////////////////////////
 
 delay_1us: LOAD sE, delay_1us_constant
           wait_1us: SUB sE, 01
@@ -102,10 +155,22 @@ delay_1s: LOAD one_second_reg, 32                         ;50 x 20ms = 1000ms
 
 ;////////////////////////////////////////////////////            ISR BLOCK              ////////////////////////////////////////////////////////////////
 
-ISR:  LOAD output_reg, heartbeat_reg
-      OUTPUT output_reg, OUTPUT_PORT
-      RETURNI ENABLE
+ISR:  INPUT input_reg, DATA_IN_PORT
+      ADD sum_reg, input_reg
+      ADDCY carry_reg, 00 ;add carry flag to carry tracker
+      ADD counter_reg, 01
+      JUMP Z, set_output
+
+isr_finish: RETURNI ENABLE
+
+msb_done:   SL0 output_reg
+            ADD output_reg, heartbeat_reg
+            LOAD sum_reg, 00
+            LOAD carry_reg, 00
+            OUTPUT output_reg, OUTPUT_PORT
+            JUMP isr_finish
+            
 
 
-ADDRESS 3FF 
+ADDRESS 3FF ;Interrupt vector
 JUMP ISR    
